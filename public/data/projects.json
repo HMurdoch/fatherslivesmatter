@@ -1,0 +1,340 @@
+[
+  {
+    "tech": "Integration",
+    "slug": "heliospay-react-dotnet-postgres-api",
+    "title": "Integration POC – HeliosPay (React → .NET API → PostgreSQL) - FRONTEND",
+    "description": "POC showing a React + Vite frontend talking to a C# ASP.NET Core API with EF Core & PostgreSQL. Includes account CRUD, transfers, transactions, and Swagger. Deployed on Render with CI/CD.",
+    "homepageUrl": "https://elementech-projects-heliospay.onrender.com/",
+    "repoUrl": "https://github.com/HMurdoch/elementech-projects-heliospay",
+    "tags": [ "React", "TypeScript", "C#", ".NET", "ASP.NET Core", "PostgreSQL", "EF Core", "Vite", "Render", "CI/CD" ],
+    "files": [
+      {
+        "type": "folder",
+        "name": "heliospay",
+        "path": "/",
+        "children": [
+          {
+            "type": "folder",
+            "name": "frontend",
+            "path": "frontend",
+            "children": [
+              {
+                "type": "file",
+                "name": "vite.config.ts",
+                "path": "frontend/vite.config.ts",
+                "language": "ts",
+                "code": "import { defineConfig } from 'vite';\nimport react from '@vitejs/plugin-react';\nexport default defineConfig({ plugins: [react()], server: { port: 3000 } });"
+              },
+              {
+                "type": "file",
+                "name": ".env.production",
+                "path": "frontend/.env.production",
+                "language": "dotenv",
+                "code": "VITE_API_BASE=https://elementech-projects-heliospay-dotnet-api.onrender.com"
+              },
+              {
+                "type": "file",
+                "name": "client.ts",
+                "path": "frontend/src/api/client.ts",
+                "language": "ts",
+                "code": "import axios from 'axios';\nconst api = axios.create({ baseURL: `${import.meta.env.VITE_API_BASE}/api` });\nexport default api;"
+              },
+              {
+                "type": "file",
+                "name": "AccountsPanel.tsx",
+                "path": "frontend/src/components/AccountsPanel.tsx",
+                "language": "tsx",
+                "code": "/* Uses AccountsApi & TransfersApi to list accounts and post transfers. UI polished with full-height pane and overflow-only scrolling. */"
+              },
+              {
+                "type": "file",
+                "name": "ui.css",
+                "path": "frontend/src/styles/ui.css",
+                "language": "css",
+                "code": "/* Full-height 2-col layout; left list scrolls only when overflowing (flex/min-height:0 pattern). See project styles. */"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "screenshots": [
+      {
+        "id": "s1",
+        "src": "/images/heliospay/heliospay-accounts.png",
+        "caption": "Accounts list with transfer panel"
+      },
+      {
+        "id": "s2",
+        "src": "/images/heliospay/heliospay-swagger.png",
+        "caption": "Swagger UI for the API"
+      },
+      {
+        "id": "s3",
+        "src": "/images/heliospay/heliospay-render.png",
+        "caption": "Render deployment (Docker + Static Site)"
+      }
+    ]
+  },
+  {
+    "tech": "Integration",
+    "slug": "heliospay-react-dotnet-postgres-frontend",
+    "title": "Integration POC – HeliosPay (React → .NET API → PostgreSQL) - Swagger API",
+    "description": "POC showing a React + Vite frontend talking to a C# ASP.NET Core API with EF Core & PostgreSQL. Includes account CRUD, transfers, transactions, and Swagger. Deployed on Render with CI/CD.",
+    "homepageUrl": "https://elementech-projects-heliospay-dotnet-api.onrender.com/swagger",
+    "repoUrl": "https://github.com/HMurdoch/elementech-projects-heliospay",
+    "tags": [ "React", "TypeScript", "C#", ".NET", "ASP.NET Core", "PostgreSQL", "EF Core", "Vite", "Render", "CI/CD" ],
+    "files": [
+      {
+        "type": "folder",
+        "name": "heliospay",
+        "path": "/",
+        "children": [
+          {
+            "type": "folder",
+            "name": "backend",
+            "path": "backend",
+            "children": [
+              {
+                "type": "folder",
+                "name": "HelioPay.API",
+                "path": "backend/HelioPay.API",
+                "children": [
+                  {
+                    "type": "file",
+                    "name": "Program.cs",
+                    "path": "backend/HelioPay.API/Program.cs",
+                    "language": "csharp",
+                    "code": "// ASP.NET Core bootstrap with Swagger & CORS\nvar builder = WebApplication.CreateBuilder(args);\nbuilder.Services.AddControllers();\nbuilder.Services.AddEndpointsApiExplorer();\nbuilder.Services.AddSwaggerGen();\n// CORS: allow frontend & swagger\nbuilder.Services.AddCors(o => o.AddPolicy(\"app\", p => p\n    .WithOrigins(\"https://elementech-projects-heliospay.onrender.com\",\n                 \"https://elementech-projects-heliospay-dotnet-api.onrender.com\")\n    .AllowAnyHeader().AllowAnyMethod()));\nvar app = builder.Build();\napp.UseCors(\"app\");\napp.UseSwagger(); app.UseSwaggerUI();\napp.MapControllers();\napp.Run();"
+                  },
+                  {
+                    "type": "file",
+                    "name": "TransactionsController.cs",
+                    "path": "backend/HelioPay.API/Controllers/TransactionsController.cs",
+                    "language": "csharp",
+                    "code": "// Simplified excerpt\n[ApiController]\n[Route(\"api/[controller]\")]\npublic class TransactionsController : ControllerBase {\n  [HttpGet]\n  public Task<IEnumerable<TransactionDto>> List([FromQuery]Guid? accountId) { /* ... */ return Task.FromResult(Enumerable.Empty<TransactionDto>()); }\n  [HttpPost]\n  public Task<IActionResult> Create(CreateTx dto) { /* ... */ return Task.FromResult<IActionResult>(Ok()); }\n}"
+                  },
+                  {
+                    "type": "file",
+                    "name": "Dockerfile",
+                    "path": "backend/HelioPay.API/Dockerfile",
+                    "language": "dockerfile",
+                    "code": "# build\nFROM mcr.microsoft.com/dotnet/sdk:8.0 AS build\nWORKDIR /src\nCOPY ./ ../\nWORKDIR /src/backend/HelioPay.API\nRUN dotnet publish HelioPay.API.csproj -c Release -o /app\n\n# run\nFROM mcr.microsoft.com/dotnet/aspnet:8.0\nWORKDIR /app\nCOPY --from=build /app ./\nENV ASPNETCORE_URLS=http://0.0.0.0:${PORT}\nCMD [\"bash\",\"-lc\",\"dotnet HelioPay.API.dll --urls http://0.0.0.0:$PORT\"]"
+                  },
+                  {
+                    "type": "file",
+                    "name": "render.yaml",
+                    "path": "backend/render.yaml",
+                    "language": "yaml",
+                    "code": "services:\n  - type: web\n    name: elementech-projects-heliospay-dotnet-api\n    env: docker\n    plan: free\n    rootDir: backend/HelioPay.API\n    dockerfilePath: backend/HelioPay.API/Dockerfile"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "screenshots": [
+      {
+        "id": "s1",
+        "src": "/images/heliospay/heliospay-accounts.png",
+        "caption": "Accounts list with transfer panel"
+      },
+      {
+        "id": "s2",
+        "src": "/images/heliospay/heliospay-swagger.png",
+        "caption": "Swagger UI for the API"
+      },
+      {
+        "id": "s3",
+        "src": "/images/heliospay/heliospay-render.png",
+        "caption": "Render deployment (Docker + Static Site)"
+      }
+    ]
+  },
+  {
+    "tech": "react",
+    "slug": "react-essentials",
+    "title": "React Essentials",
+    "description": "Key React patterns & hooks",
+    "homepageUrl": "https://example.com/essentials",
+    "repoUrl": "",
+    "tags": [ "React", "Patterns" ],
+    "files": [
+      {
+        "type": "folder",
+        "name": "react_essentials",
+        "path": "technologies/react_essentials",
+        "children": [
+          {
+            "type": "folder",
+            "name": "src",
+            "path": "technologies/react_essentials/src",
+            "children": [
+              {
+                "type": "file",
+                "name": "Counter.jsx",
+                "path": "technologies/react_essentials/src/Counter.jsx",
+                "language": "jsx",
+                "code": "import {useState} from 'react'; export default function Counter(){const [c,setC]=useState(0); return <button onClick={()=>setC(c+1)}>Count {c}</button>;}"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "screenshots": [
+      {
+        "id": "s1",
+        "src": "/images/essentials-1.png",
+        "caption": "Counter"
+      }
+    ]
+  },
+  {
+    "tech": "react",
+    "slug": "vanilla-js-example",
+    "title": "Vanilla JS Example",
+    "description": "Sample overview of Vanilla Javascript",
+    "homepageUrl": "https://elementech-technology-vanilla-js.onrender.com/",
+    "repoUrl": "https://github.com/HMurdoch/elementech-technology-vanilla_js/tree/master",
+    "tags": [ "JavaScript", "Basics" ],
+    "screenshots": [
+      {
+        "id": 1,
+        "src": "/images/vanilla_js/screenshot-01.png",
+        "caption": "Initial UI"
+      },
+      {
+        "id": 2,
+        "src": "/images/vanilla_js/screenshot-02.png",
+        "caption": "Tabs example"
+      },
+      {
+        "id": 3,
+        "src": "/images/vanilla_js/screenshot-03.png",
+        "caption": "Dynamic content"
+      }
+    ],
+    "files": [
+      {
+        "type": "folder",
+        "name": "vanilla_js",
+        "path": "technologies/vanilla_js",
+        "children": [
+          {
+            "type": "folder",
+            "name": "src",
+            "path": "technologies/vanilla_js/src",
+            "children": [
+              {
+                "type": "file",
+                "name": "main.js",
+                "path": "technologies/vanilla_js/src/main.js",
+                "language": "javascript",
+                "code": "import './style.css'\nimport javascriptLogo from './javascript.svg'\nimport viteLogo from '/vite.svg'\nimport { setupCounter } from './counter.js'\n\ndocument.querySelector('#app').innerHTML = `\n  <div>\n    <a href=\"https://vite.dev\" target=\"_blank\">\n      <img src=\"${viteLogo}\" class=\"logo\" alt=\"Vite logo\" />\n    </a>\n    <a href=\"https://developer.mozilla.org/en-US/docs/Web/JavaScript\" target=\"_blank\">\n      <img src=\"${javascriptLogo}\" class=\"logo vanilla\" alt=\"JavaScript logo\" />\n    </a>\n    <h1>Hello Vite!</h1>\n    <div class=\"card\">\n      <button id=\"counter\" type=\"button\"></button>\n    </div>\n    <p class=\"read-the-docs\">\n      Click on the Vite logo to learn more\n    </p>\n  </div>\n`\n\nsetupCounter(document.querySelector('#counter'))"
+              },
+              {
+                "type": "file",
+                "name": "styles.css",
+                "path": "technologies/vanilla_js/src/styles.css",
+                "language": "css",
+                "code": ":root {\n  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;\n  line-height: 1.5;\n  font-weight: 400;\n\n  color-scheme: light dark;\n  color: rgba(255, 255, 255, 0.87);\n  background-color: #242424;\n\n  font-synthesis: none;\n  text-rendering: optimizeLegibility;\n  -webkit-font-smoothing: antialiased;\n  -moz-osx-font-smoothing: grayscale;\n}\n\na {\n  font-weight: 500;\n  color: #646cff;\n  text-decoration: inherit;\n}\na:hover {\n  color: #535bf2;\n}\n\nbody {\n  margin: 0;\n  display: flex;\n  place-items: center;\n  min-width: 320px;\n  min-height: 100vh;\n}\n\nh1 {\n  font-size: 3.2em;\n  line-height: 1.1;\n}\n\n#app {\n  max-width: 1280px;\n  margin: 0 auto;\n  padding: 2rem;\n  text-align: center;\n}\n\n.logo {\n  height: 6em;\n  padding: 1.5em;\n  will-change: filter;\n  transition: filter 300ms;\n}\n.logo:hover {\n  filter: drop-shadow(0 0 2em #646cffaa);\n}\n.logo.vanilla:hover {\n  filter: drop-shadow(0 0 2em #f7df1eaa);\n}\n\n.card {\n  padding: 2em;\n}\n\n.read-the-docs {\n  color: #888;\n}\n\nbutton {\n  border-radius: 8px;\n  border: 1px solid transparent;\n  padding: 0.6em 1.2em;\n  font-size: 1em;\n  font-weight: 500;\n  font-family: inherit;\n  background-color: #1a1a1a;\n  cursor: pointer;\n  transition: border-color 0.25s;\n}\nbutton:hover {\n  border-color: #646cff;\n}\nbutton:focus,\nbutton:focus-visible {\n  outline: 4px auto -webkit-focus-ring-color;\n}\n\n@media (prefers-color-scheme: light) {\n  :root {\n    color: #213547;\n    background-color: #ffffff;\n  }\n  a:hover {\n    color: #747bff;\n  }\n  button {\n    background-color: #f9f9f9;\n  }\n}"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "file",
+        "name": "index.html",
+        "path": "technologies/vanilla_js/index.html",
+        "language": "html",
+        "code": "<!DOCTYPE html>\n<html>\n<head>\n    <title>Vanilla JavaScript</title>\n    <meta charset=\"UTF-8\" />\n    <link rel=\"stylesheet\" href=\"styles.css\" />\n    <script src=\"index.js\" type=\"module\"></script>\n</head>\n\n<body>\n<header>\n    <img src=\"js-logo-xs.png\" alt=\"JavaScript logo\" />\n    <div>\n        <h1>Vanilla JavaScript</h1>\n        <p>i.e., JavaScript without any (UI) framework or library</p>\n    </div>\n</header>\n\n<div id=\"tabs\">\n    <menu>\n        <button id=\"btn-why-react\" class=\"active\">Why React?</button>\n        <button id=\"btn-core-features\">Core Features</button>\n        <button id=\"btn-resources\">Related Resources</button>\n    </menu>\n    <div id=\"tab-content\"></div>\n</div>\n</body>\n</html>"
+      },
+      {
+        "type": "file",
+        "name": "index.js",
+        "path": "technologies/vanilla_js/index.js",
+        "language": "javascript",
+        "code": "const content = [\n    [\n        \"React is extremely popular\",\n        \"It makes building complex, interactive UIs a breeze\",\n        \"It's powerful & flexible\",\n        \"It has a very active and versatile ecosystem\"\n    ],\n    [\n        \"Components, JSX & Props\",\n        \"State\",\n        \"Hooks (e.g., useEffect())\",\n        \"Dynamic rendering\"\n    ],\n    [\n        \"Official web page (react.dev)\",\n        \"Next.js (Fullstack framework)\",\n        \"React Native (build native mobile apps with React)\"\n    ]\n];\n\nconst btnWhyReact = document.getElementById(\"btn-why-react\");\nconst btnCoreFeature = document.getElementById(\"btn-core-features\");\nconst btnResources = document.getElementById(\"btn-resources\");\nconst tabContent = document.getElementById(\"tab-content\");\n\nfunction displayContent(items) {\n    let listContent = \"\";\n    for (const item of items) {\n        listContent += `<li>${item}</li>`;\n    }\n    const list = document.createElement(\"ul\");\n    tabContent.innerHTML = \"\"; // clear existing content\n    list.innerHTML = listContent; // insert new content\n    tabContent.append(list);\n}\n\nfunction highlightButton(btn) {\n    // Clear all existing styling / highlights\n    btnWhyReact.className = \"\";\n    btnCoreFeature.className = \"\";\n    btnResources.className = \"\";\n    btn.className = \"active\"; // set new style / highlight\n}\n\nfunction handleClick(event) {\n    const btnId = event.target.id;\n    highlightButton(event.target);\n    if (btnId === \"btn-why-react\") {\n        displayContent(content[0]);\n    } else if (btnId === \"btn-core-features\") {\n        displayContent(content[1]);\n    } else {\n        displayContent(content[2]);\n    }\n}\n\ndisplayContent(content[0]); // initially show this content\n\nbtnWhyReact.addEventListener(\"click\", handleClick);\nbtnCoreFeature.addEventListener(\"click\", handleClick);\nbtnResources.addEventListener(\"click\", handleClick);"
+      },
+      {
+        "type": "file",
+        "name": "styles.css",
+        "path": "technologies/vanilla_js/styles.css",
+        "language": "css",
+        "code": "* {\n    box-sizing: border-box;\n}\n\nbody {\n    font-family: sans-serif;\n    background-color: #181c1f;\n    color: #bdd1d4;\n    margin: 2rem;\n}\n\nheader {\n    margin: 2rem 0;\n    display: flex;\n    gap: 1.5rem;\n    align-items: center;\n}\n\nheader img {\n    width: 3rem;\n    object-fit: contain;\n}\n\nheader h1 {\n    margin: 0;\n    color: #f3e248;\n}\n\nheader p {\n    margin: 0;\n    color: #dbd7b1;\n}\n\n#tabs {\n    max-width: 32rem;\n    margin: 2rem 0;\n    overflow: hidden;\n}\n\n#tabs menu {\n    margin: 0;\n    padding: 0;\n    display: flex;\n    gap: 0.25rem;\n}\n\n#tabs button {\n    font: inherit;\n    font-size: 0.85rem;\n    background-color: #282f33;\n    border: none;\n    border-bottom-color: #f3e248;\n    color: #e0eff1;\n    border-radius: 4px 4px 0 0;\n    padding: 0.75rem 1rem;\n    cursor: pointer;\n    transition: all 0.2s ease-out;\n}\n\n#tabs button:hover,\n#tabs button.active {\n    background-color: #f3e248;\n    color: #273133;\n}\n\n#tab-content {\n    background-color: #2d3942;\n    border-radius: 0 4px 4px 4px;\n    padding: 1rem;\n}\n\n#tab-content li {\n    margin: 0.75rem 0;\n}"
+      }
+    ]
+  },
+  {
+    "tech": "react",
+    "slug": "react-js-example",
+    "title": "React JS Example",
+    "description": "Sample overview of React Javascript",
+    "homepageUrl": "https://elementech-technology-react-js.onrender.com",
+    "repoUrl": "https://github.com/HMurdoch/elementech-technology-react_js/tree/master",
+    "tags": [ "React", "SPA", "Hooks" ],
+    "screenshots": [
+      {
+        "id": 1,
+        "src": "/images/react_js/screenshot-01.png",
+        "caption": "Initial UI"
+      },
+      {
+        "id": 2,
+        "src": "/images/react_js/screenshot-02.png",
+        "caption": "Tabs example"
+      },
+      {
+        "id": 3,
+        "src": "/images/react_js/screenshot-03.png",
+        "caption": "Dynamic content"
+      },
+      {
+        "id": 4,
+        "src": "/images/react_js/screenshot-03.png",
+        "caption": "Dynamic content"
+      }
+    ],
+    "files": [
+      {
+        "type": "folder",
+        "name": "react_js",
+        "path": "technologies/react_js",
+        "children": [
+          {
+            "type": "folder",
+            "name": "src",
+            "path": "technologies/react_js/src",
+            "children": [
+              {
+                "type": "file",
+                "name": "App.jsx",
+                "path": "technologies/react_js/src/App.jsx",
+                "language": "jsx",
+                "code": "import { useState } from \"react\";\nimport \"./styles.css\";\n\nconst content = [\n    [\n        \"React is extremely popular\",\n        \"It makes building complex, interactive UIs a breeze\",\n        \"It's powerful & flexible\",\n        \"It has a very active and versatile ecosystem\",\n    ],\n    [\n        \"Components, JSX & Props\",\n        \"State\",\n        \"Hooks (e.g., useEffect())\",\n        \"Dynamic rendering\",\n    ],\n    [\n        \"Official web page (react.dev)\",\n        \"Next.js (Fullstack framework)\",\n        \"React Native (build native mobile apps with React)\",\n    ],\n    [\n        \"Vanilla JavaScript requires imperative programming\",\n        \"Imperative Programming: You define all the steps needed to achieve a result\",\n        \"React on the other hand embraces declarative programming\",\n        \"With React, you define the goal and React figures out how to get there\",\n    ],\n];\n\nexport default function App() {\n    const [activeContentIndex, setActiveContentIndex] = useState(0);\n\n    return (\n        <div>\n            <header>\n                <img src=\"react-logo-xs.png\" alt=\"React logo\" />\n                <div>\n                    <h1>React.js</h1>\n                    <p>i.e., using the React library for rendering the UI</p>\n                </div>\n            </header>\n\n            <div id=\"tabs\">\n                <menu>\n                    <button\n                        className={activeContentIndex === 0 ? \"active\" : \"\"}\n                        onClick={() => setActiveContentIndex(0)}\n                    >\n                        Why React?\n                    </button>\n                    <button\n                        className={activeContentIndex === 1 ? \"active\" : \"\"}\n                        onClick={() => setActiveContentIndex(1)}\n                    >\n                        Core Features\n                    </button>\n                    <button\n                        className={activeContentIndex === 2 ? \"active\" : \"\"}\n                        onClick={() => setActiveContentIndex(2)}\n                    >\n                        Related Resources\n                    </button>\n                    <button\n                        className={activeContentIndex === 3 ? \"active\" : \"\"}\n                        onClick={() => setActiveContentIndex(3)}\n                    >\n                        React vs Vanilla\n                    </button>\n                </menu>\n                <div id=\"tab-content\">\n                    <ul>\n                        {content[activeContentIndex].map((item) => (\n                            <li key={item}>{item}</li>\n                        ))}\n                    </ul>\n                </div>\n            </div>\n        </div>\n    );\n}"
+              },
+              {
+                "type": "file",
+                "name": "index.js",
+                "path": "technologies/react_js/src/index.js",
+                "language": "jsx",
+                "code": "import { StrictMode } from \"react\";\nimport { createRoot } from \"react-dom/client\";\n\nimport App from \"./App.js\";\n\nconst rootElement = document.getElementById(\"root\");\nconst root = createRoot(rootElement);\n\nroot.render(\n    <StrictMode>\n        <App />\n    </StrictMode>\n);"
+              },
+              {
+                "type": "file",
+                "name": "styles.css",
+                "path": "technologies/react_js/src/styles.css",
+                "language": "css",
+                "code": "* {\n    box-sizing: border-box;\n}\n\nbody {\n    font-family: sans-serif;\n    background-color: #181c1f;\n    color: #bdd1d4;\n    margin: 2rem;\n}\n\nheader {\n    margin: 2rem 0;\n    display: flex;\n    gap: 1.5rem;\n    align-items: center;\n}\n\nheader img {\n    width: 3rem;\n    object-fit: contain;\n}\n\nheader h1 {\n    margin: 0;\n    color: #48d9f3;\n}\n\nheader p {\n    margin: 0;\n    color: #82c2ce;\n}\n\n#tabs {\n    max-width: 32rem;\n    margin: 2rem 0;\n    overflow: hidden;\n}\n\n#tabs menu {\n    margin: 0;\n    padding: 0;\n    display: flex;\n    gap: 0.25rem;\n}\n\n#tabs button {\n    font: inherit;\n    font-size: 0.85rem;\n    background-color: #282f33;\n    border: none;\n    border-bottom-color: #48d9f3;\n    color: #e0eff1;\n    border-radius: 4px 4px 0 0;\n    padding: 0.75rem 1rem;\n    cursor: pointer;\n    transition: all 0.2s ease-out;\n}\n\n#tabs button:hover,\n#tabs button.active {\n    background-color: #48d9f3;\n    color: #273133;\n}\n\n#tab-content {\n    background-color: #2d3942;\n    border-radius: 0 4px 4px 4px;\n    padding: 1rem;\n}\n\n#tab-content li {\n    margin: 0.75rem 0;\n}"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]
